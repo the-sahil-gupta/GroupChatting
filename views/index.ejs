@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Chat App</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+	</head>
+	<body class="bg-gray-100 flex items-center justify-center h-screen">
+		<div id="enterName" class="w-full max-w-sm p-4 bg-white rounded shadow-md">
+			<h1 class="text-2xl font-bold mb-4">Enter Your Name</h1>
+			<form>
+				<input
+					id="nameInput"
+					type="text"
+					placeholder="Your name"
+					class="border p-2 w-full mb-4" />
+				<input
+					id="submit"
+					type="submit"
+					class="bg-blue-500 text-white p-2 rounded w-full" />
+			</form>
+		</div>
+
+		<div
+			id="chatInterface"
+			class="hidden w-full max-w-sm p-4 bg-white rounded shadow-md">
+			<div class="mb-4">
+				<h1 class="text-2xl font-bold">Chat Room</h1>
+			</div>
+			<div id="messages" class="border p-2 h-40 overflow-y-auto mb-4"></div>
+			<input
+				id="messageInput"
+				type="text"
+				placeholder="Type your message"
+				class="border p-2 w-full mb-2" />
+			<button id="sendBtn" class="bg-blue-500 text-white p-2 rounded w-full">
+				Send
+			</button>
+		</div>
+
+		<script
+			src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+			integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+			crossorigin="anonymous"></script>
+		<script>
+			const socket = io();
+
+			const enterNameDiv = document.querySelector('#enterName');
+			const chatInterfaceDiv = document.querySelector('#chatInterface');
+			const submitName = document.querySelector('#enterName #submit');
+			const nameInput = document.querySelector('#nameInput');
+
+			submitName.addEventListener('click', () => {
+				event.preventDefault();
+				if (nameInput.value.trim() !== '') {
+					socket.emit('nameInput', nameInput.value);
+				}
+			});
+			socket.on('nameInput', function (usersArr) {
+				enterNameDiv.classList.add('hidden');
+				chatInterfaceDiv.classList.remove('hidden');
+				console.log(usersArr);
+			});
+
+			// const inp = document.querySelector('#nameInput');
+
+			// inp.addEventListener('input', (event) => {
+			// 	socket.emit('typing', inp.value);
+			// });
+
+			// socket.on('result', function (result) {
+			// 	if (result) inp.style.outlineColor = 'red';
+			// 	else inp.style.outlineColor = 'green';
+			// });
+		</script>
+	</body>
+</html>
