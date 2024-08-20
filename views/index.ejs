@@ -6,35 +6,40 @@
 		<title>Chat App</title>
 		<script src="https://cdn.tailwindcss.com"></script>
 	</head>
-	<body class="bg-gray-100 flex items-center justify-center h-screen">
-		<div id="enterName" class="w-full max-w-sm p-4 bg-white rounded shadow-md">
+	<body
+		class="bg-gray-800 flex items-center justify-center h-screen text-gray-300">
+		<div
+			id="enterName"
+			class="w-full max-w-sm p-4 bg-gray-700 rounded shadow-md">
 			<h1 class="text-2xl font-bold mb-4">Enter Your Name</h1>
 			<form>
 				<input
 					id="nameInput"
 					type="text"
 					placeholder="Your name"
-					class="border p-2 w-full mb-4" />
+					class="outline-none border border-gray-600 bg-gray-800 p-2 w-full mb-4 text-white" />
 				<input
 					id="submit"
 					type="submit"
-					class="bg-blue-500 text-white p-2 rounded w-full" />
+					class="bg-blue-700 text-white p-2 rounded w-full" />
 			</form>
 		</div>
 
 		<div
 			id="chatInterface"
-			class="hidden w-full max-w-sm p-4 bg-white rounded shadow-md">
+			class="hidden w-full max-w-sm p-4 bg-gray-700 rounded shadow-md">
 			<div class="mb-4">
 				<h1 class="text-2xl font-bold">Chat Room</h1>
 			</div>
-			<div id="messages" class="border p-2 h-40 overflow-y-auto mb-4"></div>
+			<div
+				id="messages"
+				class="border border-gray-600 p-2 h-40 overflow-y-auto mb-4 bg-gray-800 text-white"></div>
 			<input
 				id="messageInput"
 				type="text"
 				placeholder="Type your message"
-				class="border p-2 w-full mb-2" />
-			<button id="sendBtn" class="bg-blue-500 text-white p-2 rounded w-full">
+				class="outline-none border border-gray-600 bg-gray-800 p-2 w-full mb-2 text-white" />
+			<button id="sendBtn" class="bg-blue-700 text-white p-2 rounded w-full">
 				Send
 			</button>
 		</div>
@@ -62,7 +67,6 @@
 				chatInterfaceDiv.classList.remove('hidden');
 				console.log(usersArr);
 			});
-
 			// const inp = document.querySelector('#nameInput');
 
 			// inp.addEventListener('input', (event) => {
