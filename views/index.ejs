@@ -9,39 +9,47 @@
 	<body
 		class="bg-gray-800 flex items-center justify-center h-screen text-gray-300">
 		<div
-			id="enterName"
+			id="enter-name"
 			class="w-full max-w-sm p-4 bg-gray-700 rounded shadow-md">
 			<h1 class="text-2xl font-bold mb-4">Enter Your Name</h1>
-			<form>
+			<form id="name-form">
 				<input
-					id="nameInput"
+					id="name-input"
 					type="text"
 					placeholder="Your name"
 					class="outline-none border border-gray-600 bg-gray-800 p-2 w-full mb-4 text-white" />
 				<input
 					id="submit"
 					type="submit"
-					class="bg-blue-700 text-white p-2 rounded w-full" />
+					class="bg-blue-700 text-white p-2 rounded w-full"
+					value="Start chat" />
 			</form>
 		</div>
 
 		<div
-			id="chatInterface"
+			id="chat-panel"
 			class="hidden w-full max-w-sm p-4 bg-gray-700 rounded shadow-md">
-			<div class="mb-4">
+			<div class="relative mb-4 w-full flex justify-between items-center">
 				<h1 class="text-2xl font-bold">Chat Room</h1>
+				<p><span id="onlinecount"></span> Users live</p>
+				<select name="users" id="select"></select>
+				<p class="typing hidden absolute right-1 top-8 text-xs italic"></p>
 			</div>
 			<div
-				id="messages"
-				class="border border-gray-600 p-2 h-40 overflow-y-auto mb-4 bg-gray-800 text-white"></div>
-			<input
-				id="messageInput"
-				type="text"
-				placeholder="Type your message"
-				class="outline-none border border-gray-600 bg-gray-800 p-2 w-full mb-2 text-white" />
-			<button id="sendBtn" class="bg-blue-700 text-white p-2 rounded w-full">
-				Send
-			</button>
+				id="message-box"
+				class="flex flex-col mt-4 border border-gray-600 p-2 h-60 overflow-y-auto mb-4 bg-gray-800 text-white"></div>
+			<form id="message-form">
+				<input
+					id="message-input"
+					type="text"
+					placeholder="Type your message"
+					class="outline-none border border-gray-600 bg-gray-800 p-2 w-full mb-2 text-white" />
+				<input
+					id="message-send"
+					type="submit"
+					value="Send"
+					class="bg-blue-700 text-center text-white p-2 rounded w-full" />
+			</form>
 		</div>
 
 		<script
@@ -49,34 +57,69 @@
 			integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
 			crossorigin="anonymous"></script>
 		<script>
-			const socket = io();
+			const nameInput = document.querySelector('#name-input');
+			const nameForm = document.querySelector('#name-form');
+			const enterNameDiv = document.querySelector('#enter-name');
+			const chatPanel = document.querySelector('#chat-panel');
+			const select = document.querySelector('#select');
+			const onlinecount = document.querySelector('#onlinecount');
+			const messageBox = document.querySelector('#message-box');
+			const messageForm = document.querySelector('#message-form');
+			const messageInput = document.querySelector('#message-input');
+			const messageSend = document.querySelector('#message-send');
+			const typing = document.querySelector('.typing');
 
-			const enterNameDiv = document.querySelector('#enterName');
-			const chatInterfaceDiv = document.querySelector('#chatInterface');
-			const submitName = document.querySelector('#enterName #submit');
-			const nameInput = document.querySelector('#nameInput');
+			let timer = '';
 
-			submitName.addEventListener('click', () => {
+			nameForm.addEventListener('submit', () => {
 				event.preventDefault();
-				if (nameInput.value.trim() !== '') {
-					socket.emit('nameInput', nameInput.value);
+
+				if (nameInput.value.trim().length > 0) {
+					enterNameDiv.classList.add('hidden');
+					chatPanel.classList.remove('hidden');
+
+					const socket = io();
+
+					const username = nameInput.value.trim();
+					socket.emit('username', username);
+
+					socket.on('users', function (usernames) {
+						onlinecount.textContent = usernames.length;
+
+						select.innerHTML = '';
+						usernames.forEach((user) => {
+							select.innerHTML += `<option>${user}</option>`;
+						});
+					});
+					messageForm.addEventListener('submit', (event) => {
+						event.preventDefault();
+
+						if (messageInput.value.trim().length > 0) {
+							socket.emit('message', messageInput.value);
+							messageInput.value = '';
+						}
+					});
+					messageInput.addEventListener('input', () => {
+						socket.emit('typing');
+					});
+					socket.on('typing', (username) => {
+						typing.textContent = `${username} is typing...`;
+						typing.classList.remove('hidden');
+
+						clearTimeout(timer);
+						timer = setTimeout(() => {
+							typing.classList.add('hidden');
+						}, 1200);
+					});
+					socket.on('message', (data) => {
+						if (socket.id === data.userid) {
+							messageBox.innerHTML += `<div class="bg-blue-700 h-fit w-fit p-1 rounded-md my-0.5 self-end"><b>${data.username}</b> : ${data.message}</div>`;
+						} else {
+							messageBox.innerHTML += `<div class="bg-zinc-400 h-fit w-fit p-1 rounded-md my-0.5 self-start"><b>${data.username}</b> : ${data.message}</div>`;
+						}
+					});
 				}
 			});
-			socket.on('nameInput', function (usersArr) {
-				enterNameDiv.classList.add('hidden');
-				chatInterfaceDiv.classList.remove('hidden');
-				console.log(usersArr);
-			});
-			// const inp = document.querySelector('#nameInput');
-
-			// inp.addEventListener('input', (event) => {
-			// 	socket.emit('typing', inp.value);
-			// });
-
-			// socket.on('result', function (result) {
-			// 	if (result) inp.style.outlineColor = 'red';
-			// 	else inp.style.outlineColor = 'green';
-			// });
 		</script>
 	</body>
 </html>

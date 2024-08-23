@@ -11,21 +11,38 @@ app.use(express.urlencoded({ extended: true }));
 const http = require('http');
 const server = http.createServer(app);
 const socketIO = require('socket.io');
-const { log } = require('console');
 const io = socketIO(server);
 
-const users = [];
+const usernames = [];
+const userids = [];
 
 io.on('connection', (socket) => {
-	socket.on('nameInput', function (user) {
-		users.push(user);
-		socket.emit('nameInput', users);
+	socket.on('username', function (username) {
+		usernames.push(username);
+		userids.push(socket.id);
+		io.emit('users', usernames);
 	});
 
-	// socket.on('typing', function (data) {
-	// 	if (users.indexOf(data) === -1) socket.emit('result', false);
-	// 	else socket.emit('result', true);
-	// });
+	socket.on('message', (message) => {
+		let index = userids.indexOf(socket.id);
+
+		io.emit('message', {
+			message,
+			username: usernames[index],
+			userid: socket.id,
+		});
+	});
+	socket.on('typing', () => {
+		const username = usernames[userids.indexOf(socket.id)];
+
+		socket.broadcast.emit('typing', username);
+	});
+	socket.on('disconnect', function () {
+		let index = userids.indexOf(socket.id);
+		userids.splice(index, 1);
+		usernames.splice(index, 1);
+		io.emit('users', usernames);
+	});
 });
 
 app.get('/', function (req, res) {
